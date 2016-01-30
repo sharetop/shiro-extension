@@ -9,8 +9,7 @@ import java.lang.annotation.Target;
  * @author yancheng
  * 
  * 示例: <br/>
- *  #@RequiresData({prop="userName",field="profileName"})
- *  #@RequiresData({prop="groupNames",index=0,field="province"})
+ *  #@RequiresData(props={"userName","groupNames[1]"},fields={"saleName","province"})
  * 
  * 
  * */
@@ -20,15 +19,13 @@ import java.lang.annotation.Target;
 public @interface RequiresData {
 	
 	/**
-	 * UserObj中的属性名称，如果类型为List，与index结合使用
+	 * UserObj中的属性名称
 	 * */
 	String[] props() default "";
 	
 	/**
-	 * 字段名称
+	 * 需要添到DataParameterRequest.getParameters()中的字段名称
 	 * */
 	String[] fields() default "";
-	
-	
 	
 }

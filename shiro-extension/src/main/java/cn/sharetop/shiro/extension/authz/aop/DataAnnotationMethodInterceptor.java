@@ -44,6 +44,9 @@ public class DataAnnotationMethodInterceptor
 		
 	}
 	
+	/**
+	 * 将props取出值并与fields一一对应，构造出Map并返回
+	 * */
 	@SuppressWarnings("unchecked")
 	private Map<String,String> _addParameters(String[] props,String[] fields,Class<?> clz,Object principal) throws Exception {
 		Map<String,String> params = new HashMap<String,String>();
@@ -53,6 +56,7 @@ public class DataAnnotationMethodInterceptor
 			String field = fields[i];
 			int index = -1;
 			
+			//处理数组的情况，当前只支持List
 			String[] strs = StringUtils.tokenizeToStringArray(prop, "[]");
 			if(strs.length>1){
 				prop = strs[0];
@@ -93,26 +97,34 @@ public class DataAnnotationMethodInterceptor
 		// TODO Auto-generated method stub
 		assertAuthorized(methodInvocation);
 		
+		//待调用的目标对象及参数列表
 		Object obj = methodInvocation.getThis();
 		Object[] args = methodInvocation.getArguments();
 		
+		//当前声明的注解
 		RequiresData an = (RequiresData)this.getAnnotation(methodInvocation);
+		
+		//当前登录用户
 		Object principal = this.getSubject().getPrincipal();
 		Class<?> clz = principal.getClass();
 		
 		String[] props = an.props();
 		String[] fields = an.fields();
 		
+		//遍历方法参数数组，找到DataParameterRequest类型的参数
 		for(Object o : args){
 			if( o instanceof DataParameterRequest ){
+				//取出它的parameters，此为一个Map类型的成员
 				Map<String,String> m = (Map<String,String>)((DataParameterRequest)o).getParameters();
 				if(m!=null){
+					//将要添加的信息注入到parameters中
 					Map<String,String> mm = this._addParameters(props, fields, clz, principal);
 					m.putAll(mm);
 				}
 			}
 		}
 		
+		//继续调用目标类的目标方法，传入修改过的参数数组
 		return methodInvocation.getMethod().invoke(obj, args);
 		
 	}
